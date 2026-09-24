@@ -8,6 +8,7 @@ builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseSqlServer(connectionString));
 builder.Services.AddScoped<IBookRepository, SQLBookRepository>();
 builder.Services.AddScoped<IAuthorRepository, SQLAuthorRepository>();
+builder.Services.AddScoped<IPublisherRepository, SQLPublisherRepository>();
 // Add services to the container.
 
 builder.Services.AddControllers();
