@@ -1,10 +1,12 @@
 using LTW2_API.Data;
+using LTW2_API.Repositories;
 using Microsoft.EntityFrameworkCore;
 var builder = WebApplication.CreateBuilder(args);
 //register DB
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseSqlServer(connectionString));
+builder.Services.AddScoped<IBookRepository, SQLBookRepository>();
 // Add services to the container.
 
 builder.Services.AddControllers();
