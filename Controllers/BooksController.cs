@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.Net;
+using LTW2_API.CustomActionFilter;
 
 namespace LTW2_API.Controllers
 {
@@ -38,9 +39,19 @@ namespace LTW2_API.Controllers
             return Ok(bookWithIdDTO);
         }
         [HttpPost("add-book")]
-        public IActionResult AddBook([FromBody] addBookRequestDTO addBookRequestDTO)
+        [ValidateModel]
+        public IActionResult AddBook(
+     [FromBody] addBookRequestDTO addBookRequestDTO)
         {
+            // validate request
+            if (!ValidateAddBook(addBookRequestDTO))
+            {
+                return BadRequest(ModelState);
+            }
+
+            // before add data
             var bookAdd = _bookRepository.AddBook(addBookRequestDTO);
+
             return Ok(bookAdd);
         }
 
@@ -56,5 +67,45 @@ namespace LTW2_API.Controllers
             var deleteBook = _bookRepository.DeleteBookById(id);
             return Ok(deleteBook);
         }
+        #region Private methods
+
+        private bool ValidateAddBook(addBookRequestDTO addBookRequestDTO)
+        {
+            if (addBookRequestDTO == null)
+            {
+                ModelState.AddModelError(
+                    nameof(addBookRequestDTO),
+                    $"Please add book data");
+
+                return false;
+            }
+
+            // kiem tra Description NotNull
+            if (string.IsNullOrEmpty(addBookRequestDTO.Description))
+            {
+                ModelState.AddModelError(
+                    nameof(addBookRequestDTO.Description),
+                    $"{nameof(addBookRequestDTO.Description)} cannot be null");
+            }
+
+            // kiem tra rating (0,5)
+            if (addBookRequestDTO.Rate < 0 ||
+                addBookRequestDTO.Rate > 5)
+            {
+                ModelState.AddModelError(
+                    nameof(addBookRequestDTO.Rate),
+                    $"{nameof(addBookRequestDTO.Rate)} cannot be less than 0 and more than 5");
+            }
+
+            if (ModelState.ErrorCount > 0)
+            {
+                return false;
+            }
+
+            return true;
+        }
+
+        #endregion
     }
+
 }
